@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Pastebin Lite</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 40px;
+      max-width: 700px;
+      margin: auto;
+    }
+    textarea, input, button {
+      width: 100%;
+      margin-top: 10px;
+      padding: 10px;
+    }
+    button {
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .result {
+      margin-top: 20px;
+      background: #f5f5f5;
+      padding: 10px;
+      word-break: break-all;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Create a Paste</h2>
+
+  <textarea id="content" rows="8" placeholder="Enter paste content..."></textarea>
+
+  <input type="number" id="ttl" placeholder="TTL (seconds) - optional" />
+  <input type="number" id="views" placeholder="Max Views - optional" />
+
+  <button onclick="createPaste()">Create Paste</button>
+
+  <div class="result" id="result"></div>
+
+  <script>
+    async function createPaste() {
+      const content = document.getElementById('content').value;
+      const ttl = document.getElementById('ttl').value;
+      const views = document.getElementById('views').value;
+
+      const payload = {
+        content: content
+      };
+
+      if (ttl) payload.ttl_seconds = Number(ttl);
+      if (views) payload.max_views = Number(views);
+
+      const res = await fetch('/api/pastes', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        document.getElementById('result').innerText =
+          'Error: ' + (data.error || 'Something went wrong');
+        return;
+      }
+
+      document.getElementById('result').innerHTML =
+        `Paste created: <a href="${data.url}" target="_blank">${data.url}</a>`;
+    }
+  </script>
+
+</body>
+</html>
